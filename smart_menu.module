@@ -1,0 +1,176 @@
+<?php
+
+/**
+ * @file
+ * Advanced settings for core smart menus.
+ */
+
+/**
+ * Implements hook_form_alter.
+ *
+ * @param $form
+ * @param $form_state
+ * @param $form_id
+ */
+function smart_menu_form_alter(&$form, &$form_state, $form_id) {
+  // Act only on menu blocks.
+  if ($form_id == 'layout_block_configure_form' && isset($form['block_settings']['menu_name'])) {
+    // Extract the current layout's name from the action path.
+    $layout_name = explode('/', $form['#action'])['5'];
+    // Find plugin's uuid.
+    $config = config('layout.layout.' . $layout_name);
+    foreach ($config->get('content') as $plugin) {
+      if ($plugin['data']['delta'] == $form['block_settings']['menu_name']['#value']) {
+        $uuid = $plugin['data']['uuid'];
+      }
+    }
+    // Save the layout and uuid for cleaning up on uninstall.
+    config_set('smart_menu.settings', $layout_name, $uuid);
+    // Load drop-down advanced settings.
+    $advanced = $config->get('content.' . $uuid . '.data.settings.block_settings.advanced');
+    // Set weight to Style settings, so we could place the advanced settings next to it.
+    $form['block_settings']['style']['#weight'] = '-5';
+    $form['block_settings']['advanced'] = [
+      '#type' => 'fieldset',
+      '#title' => t('Smart menu options'),
+      '#weight' => -4,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#states' => [
+        'visible' => [
+          'select[name="block_settings[style]"]' => ['value' => 'dropdown'],
+        ],
+      ],
+    ];
+
+    $form['block_settings']['advanced']['mainMenuSubOffsetX'] = [
+      '#type' => 'textfield',
+      '#title' => t('Horizontal offset'),
+      '#default_value' => isset($advanced['mainMenuSubOffsetX']) ? $advanced['mainMenuSubOffsetX'] : '0',
+      '#description' => t('Horizontal pixels offset from sub-menu\'s default position.'),
+    ];
+
+    $form['block_settings']['advanced']['mainMenuSubOffsetY'] = [
+      '#type' => 'textfield',
+      '#title' => t('Vertical offset'),
+      '#default_value' => isset($advanced['mainMenuSubOffsetY']) ? $advanced['mainMenuSubOffsetY'] : '0',
+      '#description' => t('Vertical pixels offset from sub-menu\'s default position.'),
+    ];
+
+    $form['block_settings']['advanced']['showTimeout'] = [
+      '#type' => 'textfield',
+      '#title' => t('Show timeout'),
+      '#default_value' => isset($advanced['showTimeout']) ? $advanced['showTimeout'] : '250',
+      '#description' => t('Timeout before showing the sub-menus.'),
+    ];
+
+    $form['block_settings']['advanced']['hideTimeout'] = [
+      '#type' => 'textfield',
+      '#title' => t('Hide timeout'),
+      '#default_value' => isset($advanced['hideTimeout']) ? $advanced['hideTimeout'] : '250',
+      '#description' => t('Timeout before hiding the sub-menus.'),
+    ];
+
+    $form['block_settings']['advanced']['subIndicators'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Display sub-menu indicators.'),
+      '#default_value' => isset($advanced['subIndicators']) ? $advanced['subIndicators'] : 'true',
+      '#description' => t('Display sub-menu indicators next to the main menu items.'),
+    ];
+
+    $form['block_settings']['advanced']['rightToLeftSubMenus'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Right to left display'),
+      '#default_value' => isset($advanced['rightToLeftSubMenus']) ? $advanced['rightToLeftSubMenus'] : 'false',
+      '#description' => t('When displaying sub-menus expand them from right to left.'),
+    );
+
+    $form['block_settings']['advanced']['bottomToTopSubMenus'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Bottom to top display'),
+      '#default_value' => isset($advanced['bottomToTopSubMenus']) ? $advanced['bottomToTopSubMenus'] : 'false',
+      '#description' => t('When displaying sub-menus expand them from bottom to top.'),
+    );
+
+    $form['block_settings']['advanced']['collapsibleBehavior'] = array(
+      '#type' => 'select',
+      '#options' => [
+        'default' => t('Default'),
+        'toggle' => t('Toggle'),
+        'link' => t('Link'),
+        'accordion' => t('Accordion'),
+        'accordion-toggle' => t('Accordion toggle'),
+        'accordion-link' => t('Accordion link'),
+      ],
+      '#title' => t('Collapsible behavior'),
+      '#default_value' => isset($advanced['collapsibleBehavior']) ? $advanced['collapsibleBehavior'] : 'default',
+      '#description' => t('<strong>Default</strong> - First tap on parent item expands sub-menu, second tap loads its link.<br>
+							<strong>Toggle</strong> - The whole parent item acts just as a toggle button for its sub-menu (expands/collapses on each tap).<br>
+							<strong>Link</strong> - The parent item acts as a regular item (first tap loads its link), the sub-menu can be expanded only via the +/- button.<br>
+							<strong>Accordion</strong> - Like <strong>Default</strong>, but on expand also resets any visible sub-menus from deeper levels or other branches.<br>
+							<strong>Accordion toggle</strong> - Like <strong>Toggle</strong>, but on expand also resets any visible sub-menus from deeper levels or other branches.<br>
+							<strong>Accordion link</strong> - Like <strong>Link</strong>, but on expand also resets any visible sub-menus from deeper levels or other branches.'),
+    );
+    // Add custom submit handler.
+    $form['#submit'][] = '_smart_menu_form_submit';
+  }
+}
+
+/**
+ * Custom form submit handler.
+ */
+function _smart_menu_form_submit($form, $form_state) {
+  $path = backdrop_get_path('module', 'smart_menu');
+  $filename = $path . '/js/jquery.smartmenus.js';
+  $content = file_get_contents($filename);
+  // Replace old values with new ones.
+  foreach ($form_state['values']['block_settings']['advanced'] as $key => $value) {
+    $old_value = $form_state['complete_form']['block_settings']['advanced'][$key]['#default_value'];
+    $new_value = $form_state['values']['block_settings']['advanced'][$key];
+    $needle = strstr(strstr($content, $key . ':'), ',', true);
+    // Special case for collapsibleBehavior: as it's value needs to be in between ''.
+    if (strpos($needle, 'collapsibleBehavior') !== false) {
+      $content = str_replace($needle, $key . ': \'' . $new_value .'\'', $content);
+    }
+    else {
+      $content = str_replace($needle, $key . ': ' . $new_value, $content);
+    }
+  }
+  // Generate a new jquery.smartmenus.js file.
+  file_put_contents($filename, $content);
+}
+
+/**
+ * Implements hook_library_info_alter.
+ * @param $libraries
+ * @param $module
+ */
+function smart_menu_library_info_alter(&$libraries, $module) {
+  if ($module == 'system') {
+    $path = backdrop_get_path('module', 'smart_menu');
+    // Unset the core library.
+    unset($libraries['smartmenus']);
+    // Build a new smartmenus library.
+    $libraries['smartmenus'] = array(
+      'title' => 'SmartMenus',
+      'website' => 'http://www.smartmenus.org',
+      'version' => '1.0.0',
+      'css' => array(
+        'core/misc/smartmenus/css/sm-core-css.css' => array(
+          'group' => CSS_THEME,
+          'media' => 'screen',
+        ),
+      ),
+      'js' => array(
+        $path . '/js/jquery.smartmenus.js' => array(
+          'group' => JS_LIBRARY,
+        ),
+        'core/misc/smartmenus/addons/keyboard/jquery.smartmenus.keyboard.js' => array(
+          'group' => JS_LIBRARY,
+        ),
+      ),
+    );
+    // Add the newly built library.
+    backdrop_add_library('smart_menu', 'smartmenus', TRUE);
+  }
+}

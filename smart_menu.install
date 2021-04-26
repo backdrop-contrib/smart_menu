@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Smart Menu module.
+ */
+
+/**
+* Implements hook_uninstall().
+*/
+function smart_menu_uninstall() {
+/*
+  unset($libraries['smartmenus']);
+  // Re-build deleted smartmenus library.
+  $libraries['smartmenus'] = array(
+    'title' => 'SmartMenus',
+    'website' => 'http://www.smartmenus.org',
+    'version' => '1.0.0',
+    'css' => array(
+      'core/misc/smartmenus/css/sm-core-css.css' => array(
+        'group' => CSS_THEME,
+        'media' => 'screen',
+      ),
+    ),
+    'js' => array(
+      'core/misc/smartmenus/jquery.smartmenus.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+      'core/misc/smartmenus/addons/keyboard/jquery.smartmenus.keyboard.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+    ),
+  );
+  // Add the newly built library.
+  backdrop_add_library('smart_menu', 'smartmenus', TRUE);
+ */
+
+  // Clean-up layout configuration files.
+  $config = config_get('smart_menu.settings');
+  foreach ($config as $layout_name => $uuid) {
+    config_clear('layout.layout.' . $layout_name,'content.' . $uuid . '.data.settings.block_settings.advanced');
+  }
+  // Finally delete own configuration file.
+  config('smart_menu.settings')->delete();
+}
