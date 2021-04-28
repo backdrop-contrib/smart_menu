@@ -1,7 +1,5 @@
 name = Smart Menu Options
 description = Advanced options for core dropdown menu style.
 backdrop = 1.x
-
+type = module
 package = System
-#stylesheets[all][] = smart_menu.css
-#scripts[] = js/jquery.smartmenus.js
