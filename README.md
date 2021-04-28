@@ -8,7 +8,7 @@ timeouts, show and hide sub-menu indicators, configure your menu's dropdown to e
 right to left and from bottom to top, and also to choose alternative collapsible behaviour:
 Default, Toggle, Link, Accordion, Accordion  toggle and Accordion link.
 
-![Smart Menu Options](screenshot.png)
+![Smart Menu Options](https://raw.githubusercontent.com/backdrop-contrib/smart_menu/1.x-1.x/screenshot.png)
 
 Installation
 ------------
