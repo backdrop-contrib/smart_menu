@@ -28,12 +28,9 @@ function smart_menu_form_alter(&$form, &$form_state, $form_id) {
     config_set('smart_menu.settings', $layout_name, $uuid);
     // Load drop-down advanced settings.
     $advanced = $config->get('content.' . $uuid . '.data.settings.block_settings.advanced');
-    // Set weight to Style settings, so we could place the advanced settings next to it.
-    $form['block_settings']['style']['#weight'] = '-5';
     $form['block_settings']['advanced'] = [
       '#type' => 'fieldset',
-      '#title' => t('Smart menu options'),
-      '#weight' => -4,
+      '#title' => t('Dropdown menu options'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#states' => [
@@ -111,6 +108,8 @@ function smart_menu_form_alter(&$form, &$form_state, $form_id) {
 							<strong>Accordion toggle</strong> - Like <strong>Toggle</strong>, but on expand also resets any visible sub-menus from deeper levels or other branches.<br>
 							<strong>Accordion link</strong> - Like <strong>Link</strong>, but on expand also resets any visible sub-menus from deeper levels or other branches.'),
     );
+    // Unset the default 'Collapsible behavior'.
+    unset($form['block_settings']['collapse']);
     // Add custom submit handler.
     $form['#submit'][] = '_smart_menu_form_submit';
   }
@@ -125,7 +124,6 @@ function _smart_menu_form_submit($form, $form_state) {
   $content = file_get_contents($filename);
   // Replace old values with new ones.
   foreach ($form_state['values']['block_settings']['advanced'] as $key => $value) {
-    $old_value = $form_state['complete_form']['block_settings']['advanced'][$key]['#default_value'];
     $new_value = $form_state['values']['block_settings']['advanced'][$key];
     $needle = strstr(strstr($content, $key . ':'), ',', true);
     // Special case for collapsibleBehavior: as it's value needs to be in between ''.
@@ -138,6 +136,7 @@ function _smart_menu_form_submit($form, $form_state) {
   }
   // Generate a new jquery.smartmenus.js file.
   file_put_contents($filename, $content);
+  backdrop_flush_all_caches();
 }
 
 /**
