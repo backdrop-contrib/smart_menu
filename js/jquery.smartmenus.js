@@ -1171,10 +1171,10 @@
     mainMenuSubOffsetY: 0,
 		subMenusSubOffsetX:	0,		// pixels offset from default position
 		subMenusSubOffsetY:	0,		// pixels offset from default position
-		subMenusMinWidth:	'10em',		// min-width for the sub menus (any CSS unit) - if set, the fixed width set in CSS will be ignored
-		subMenusMaxWidth:	'20em',		// max-width for the sub menus (any CSS unit) - if set, the fixed width set in CSS will be ignored
+		subMenusMinWidth: '10em',		// min-width for the sub menus (any CSS unit) - if set, the fixed width set in CSS will be ignored
+		subMenusMaxWidth: '20em',		// max-width for the sub menus (any CSS unit) - if set, the fixed width set in CSS will be ignored
 		subIndicators: 1,		// create sub menu indicators - creates a SPAN and inserts it in the A
-		subIndicatorsPos: 	'append',	// position of the SPAN relative to the menu item content ('append', 'prepend')
+		subIndicatorsPos: 	'prepend',	// position of the SPAN relative to the menu item content ('append', 'prepend')
 		subIndicatorsText:	'',		// [optionally] add text in the SPAN (e.g. '+') (you may want to check the CSS for the sub indicators too)
 		scrollStep: 		30,		// pixels step when scrolling long sub menus that do not fit in the viewport height
 		scrollAccelerate:	true,		// accelerate scrolling or use a fixed step
@@ -1203,7 +1203,7 @@
 		markCurrentTree:	true,		// add the 'current' class also to the A elements of all ancestor items of the current item
 		rightToLeftSubMenus: 0,		// right to left display of the sub menus (check the CSS for the sub indicators' position)
 		bottomToTopSubMenus: 0,		// bottom to top display of the sub menus
-		collapsibleBehavior: 'toggle', // ('toggle', 'link', 'accordion', 'accordion-toggle', 'accordion-link')
+		collapsibleBehavior: 'default', // ('toggle', 'link', 'accordion', 'accordion-toggle', 'accordion-link')
 							// 'default' - first tap on parent item expands sub, second tap loads its link
 							// 'toggle' - the whole parent item acts just as a toggle button for its sub menu (expands/collapses on each tap)
 							// 'link' - the parent item acts as a regular item (first tap loads its link), the sub menu can be expanded only via the +/- button

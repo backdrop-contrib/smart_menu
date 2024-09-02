@@ -54,6 +54,20 @@ function smart_menu_form_alter(&$form, &$form_state, $form_id) {
       '#description' => t('Vertical pixels offset from sub-menu\'s default position.'),
     ];
 
+    $form['block_settings']['advanced']['subMenusMinWidth'] = [
+      '#type' => 'textfield',
+      '#title' => t('Minimum Width'),
+      '#default_value' => isset($advanced['subMenusMinWidth']) ? $advanced['subMenusMinWidth'] : '20em',
+      '#description' => t('Minimum width for sub menus. If set, the fixed width set in CSS will be ignored'),
+    ];
+
+    $form['block_settings']['advanced']['subMenusMaxWidth'] = [
+      '#type' => 'textfield',
+      '#title' => t('Maximum Width'),
+      '#default_value' => isset($advanced['subMenusMaxWidth']) ? $advanced['subMenusMaxWidth'] : '40em',
+      '#description' => t('Maximum width for sub menus. If set, the fixed width set in CSS will be ignored'),
+    ];
+
     $form['block_settings']['advanced']['showTimeout'] = [
       '#type' => 'textfield',
       '#title' => t('Show timeout'),
@@ -108,8 +122,10 @@ function smart_menu_form_alter(&$form, &$form_state, $form_id) {
 							<strong>Accordion toggle</strong> - Like <strong>Toggle</strong>, but on expand also resets any visible sub-menus from deeper levels or other branches.<br>
 							<strong>Accordion link</strong> - Like <strong>Link</strong>, but on expand also resets any visible sub-menus from deeper levels or other branches.'),
     );
-    // Unset the default 'Collapsible behavior'.
+    // Unset duplicated default options.
     unset($form['block_settings']['collapse']);
+    unset($form['block_settings']['accordion']);
+    unset($form['block_settings']['clickdown']);
     // Add custom submit handler.
     $form['#submit'][] = '_smart_menu_form_submit';
   }
@@ -127,7 +143,7 @@ function _smart_menu_form_submit($form, $form_state) {
     $new_value = $form_state['values']['block_settings']['advanced'][$key];
     $needle = strstr(strstr($content, $key . ':'), ',', true);
     // Special case for collapsibleBehavior: as it's value needs to be in between ''.
-    if (strpos($needle, 'collapsibleBehavior') !== false) {
+    if (str_contains($needle, 'collapsibleBehavior') || str_contains($needle, 'subMenusMinWidth') || str_contains($needle, 'subMenusMaxWidth')) {
       $content = str_replace($needle, $key . ': \'' . $new_value .'\'', $content);
     }
     else {
