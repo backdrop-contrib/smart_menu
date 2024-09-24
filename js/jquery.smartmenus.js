@@ -1171,14 +1171,14 @@
     mainMenuSubOffsetY: 0,
 		subMenusSubOffsetX:	0,		// pixels offset from default position
 		subMenusSubOffsetY:	0,		// pixels offset from default position
-		subMenusMinWidth: '10em',		// min-width for the sub menus (any CSS unit) - if set, the fixed width set in CSS will be ignored
-		subMenusMaxWidth: '20em',		// max-width for the sub menus (any CSS unit) - if set, the fixed width set in CSS will be ignored
-		subIndicators: 1,		// create sub menu indicators - creates a SPAN and inserts it in the A
+		subMenusMinWidth: '20em',		// min-width for the sub menus (any CSS unit) - if set, the fixed width set in CSS will be ignored
+		subMenusMaxWidth: '40em',		// max-width for the sub menus (any CSS unit) - if set, the fixed width set in CSS will be ignored
+		subIndicators: 0,		// create sub menu indicators - creates a SPAN and inserts it in the A
 		subIndicatorsPos: 	'prepend',	// position of the SPAN relative to the menu item content ('append', 'prepend')
 		subIndicatorsText:	'',		// [optionally] add text in the SPAN (e.g. '+') (you may want to check the CSS for the sub indicators too)
 		scrollStep: 		30,		// pixels step when scrolling long sub menus that do not fit in the viewport height
 		scrollAccelerate:	true,		// accelerate scrolling or use a fixed step
-		showTimeout: 0,		// timeout before showing the sub menus
+		showTimeout: 250,		// timeout before showing the sub menus
 		hideTimeout: 250,		// timeout before hiding the sub menus
 		showDuration:		0,		// duration for show animation - set to 0 for no animation - matters only if showFunction:null
 		showFunction:		null,		// custom function to use when showing a sub menu (the default is the jQuery 'show')

@@ -24,6 +24,9 @@ function smart_menu_form_alter(&$form, &$form_state, $form_id) {
         $uuid = $plugin['data']['uuid'];
       }
     }
+    if (!isset($uuid)) {
+      return;
+    }
     // Save the layout and uuid for cleaning up on uninstall.
     config_set('smart_menu.settings', $layout_name, $uuid);
     // Load drop-down advanced settings.
